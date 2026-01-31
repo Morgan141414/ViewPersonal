@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "render-build": "npm install && npm run build",
+    "render-start": "npm run preview -- --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.1.13",

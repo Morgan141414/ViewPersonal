@@ -82,6 +82,7 @@ function httpError(status: number, text: string) {
 export function api(token: string | null) {
   const coreUrl = (import.meta as any).env?.VITE_CORE_URL || 'http://127.0.0.1:8000'
   const aiUrl = (import.meta as any).env?.VITE_AI_URL || 'http://127.0.0.1:9000'
+  const offline = token === 'offline'
 
   async function request(path: string, init?: RequestInit) {
     const headers: Record<string, string> = {
@@ -104,6 +105,141 @@ export function api(token: string | null) {
       throw httpError(res.status, bodyText || res.statusText)
     }
     return bodyText ? JSON.parse(bodyText) : null
+  }
+
+  if (offline) {
+    return {
+      coreUrl,
+      aiUrl,
+
+      async login() {
+        return { access_token: 'offline', token_type: 'bearer' } as TokenOut
+      },
+
+      async listEmployees(): Promise<Employee[]> {
+        return []
+      },
+
+      async createEmployee(input: { full_name: string; email?: string | null; external_id?: string | null }): Promise<Employee> {
+        return {
+          id: crypto.randomUUID(),
+          full_name: input.full_name,
+          email: input.email ?? null,
+          external_id: input.external_id ?? null,
+          is_active: true,
+        }
+      },
+
+      async getCurrentPresence(): Promise<PresenceCurrent[]> {
+        return []
+      },
+
+      async getAiCurrent(): Promise<AiCurrent[]> {
+        return []
+      },
+
+      async getHeatmap(): Promise<Heatmap> {
+        return { ok: true, window_minutes: 60, zones: {} }
+      },
+
+      async getInsights(): Promise<InsightsOut> {
+        return { ok: true, window_minutes: 60, insights: [] }
+      },
+
+      async getInsightsTimeline(): Promise<InsightsTimelineOut> {
+        return {
+          ok: true,
+          current: { minutes: 240, bucket_minutes: 15, buckets: [] },
+          baseline: { minutes: 240, bucket_minutes: 15, buckets: [] },
+          current_total: 0,
+          baseline_total: 0,
+        }
+      },
+
+      async getInsightsTrends(): Promise<InsightsTrendsOut> {
+        return { ok: true, days: 7, buckets: [], current_total: 0, previous_total: 0 }
+      },
+
+      async getRecommendations(): Promise<RecommendationsOut> {
+        return { ok: true, window_minutes: 60, recommendations: [] }
+      },
+
+      async getAlerts(): Promise<AlertsOut> {
+        return { ok: true, window_minutes: 60, alerts: [] }
+      },
+
+      async getComplianceZones() {
+        return { ok: true, zones: [] }
+      },
+
+      async getComplianceZone() {
+        return { ok: true, zone: { zone_id: '-', state: 'UNKNOWN', violations: [], since: new Date().toISOString(), severity: 'info' } }
+      },
+
+      async getMe(): Promise<MeOut> {
+        return { id: 'offline', email: 'admin@example.com', role: 'admin', is_active: true }
+      },
+
+      async ingestPresenceEvent() {
+        return { ok: true }
+      },
+
+      async seedDemo() {
+        return { ok: true }
+      },
+
+      async faceEnroll() {
+        return { ok: false, employee_id: '', embedding_id: '' }
+      },
+
+      async faceIdentify() {
+        return { ok: true, matches: [] }
+      },
+
+      async analyzeImage() {
+        return { ok: false }
+      },
+
+      async getAiIngestStatusAll(): Promise<{ ok: boolean; ingests: AiIngestStatus[] }> {
+        return { ok: true, ingests: [] }
+      },
+
+      async chatRespond(message: string): Promise<ChatOut> {
+        return {
+          ok: true,
+          reply: `Оффлайн-режим: сервисы недоступны. Ваш запрос: ${message}`,
+          ts: new Date().toISOString(),
+          suggestions: ['Сводка за последний час', 'Покажи нарушения по зонам'],
+        }
+      },
+
+      async getTrainingJobs(): Promise<TrainingJobsOut> {
+        return { ok: true, jobs: [] }
+      },
+
+      async createTrainingJob(): Promise<TrainingJobOut> {
+        return {
+          ok: true,
+          job: {
+            id: crypto.randomUUID(),
+            name: 'Оффлайн-джоба',
+            status: 'queued',
+            created_at: new Date().toISOString(),
+            window_minutes: 60,
+            sources: [],
+          },
+        }
+      },
+
+      async getTrainingDatasetSnapshot(): Promise<TrainingDatasetOut> {
+        return {
+          ok: true,
+          window_minutes: 60,
+          counts: { presence: 0, ai: 0, position: 0 },
+          samples: { presence: [], ai: [], position: [] },
+        }
+      },
+    }
   }
 
   return {

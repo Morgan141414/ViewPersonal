@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ComplianceEvent",
+  "type": "object",
+  "properties": {
+    "event_type": { "type": "string", "const": "compliance.zone" },
+    "zone_id": { "type": "string" },
+    "regulation_id": { "type": ["string", "null"] },
+    "state": { "type": "string" },
+    "violations": { "type": "array", "items": { "type": "string" } },
+    "since": { "type": "string" },
+    "severity": { "type": "string" },
+    "ts": { "type": "string" },
+    "version": { "type": "string" }
+  },
+  "required": ["event_type", "zone_id", "state", "violations", "since", "severity", "ts", "version"]
+}

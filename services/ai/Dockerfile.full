@@ -1,0 +1,29 @@
+# Full-stack image: includes torch/tensorflow/dlib/face_recognition in addition to the ONNX+MediaPipe pipeline.
+# WARNING: This can be huge and may fail without extra system deps.
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    wget \
+    build-essential \
+    cmake \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY services/ai/requirements.full.txt /app/requirements.full.txt
+RUN pip install --no-cache-dir -r /app/requirements.full.txt
+
+COPY services/ai/app /app/app
+
+EXPOSE 9000
+
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000"]

@@ -1,0 +1,33 @@
+roles:
+  - role_id: surgeon
+    description: "Хирург"
+    permissions: [operating_room]
+  - role_id: nurse
+    description: "Медицинская сестра"
+    permissions: [operating_room, prep]
+  - role_id: anesthesiologist
+    description: "Анестезиолог"
+    permissions: [operating_room]
+  - role_id: orderly
+    description: "Санитар"
+    permissions: [corridor, prep]
+
+zones:
+  - zone_id: OR-1
+    type: operating_room
+    criticality: high
+    camera_ids: [cam-3, cam-4]
+
+regulations:
+  - regulation_id: OR_STANDARD
+    zone_type: operating_room
+    severity: critical
+    required_roles:
+      surgeon: { min: 1, max: 1 }
+      nurse: { min: 1, max: 2 }
+      anesthesiologist: { min: 1, max: 1 }
+    forbidden_roles: [patient]
+    allowed_absence_seconds: 30
+    violation_escalation_seconds:
+      understaffed: 120
+      unauthorized: 60

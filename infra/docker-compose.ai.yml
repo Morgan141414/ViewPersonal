@@ -1,0 +1,84 @@
+services:
+  ai:
+    build:
+      context: ..
+      dockerfile: services/ai/Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - ENVIRONMENT=dev
+      - CORE_API_URL=http://host.docker.internal:8000
+      - AI_INGEST_API_KEY=supersecret
+      - AI_DB_URL=sqlite+pysqlite:////data/ai.db
+      - MODEL_DIR=/models
+      - ZONE_MAP_JSON={"ap-1":"zone-a","ap-2":"zone-b","ble-1":"zone-a"}
+      - ENABLE_VIDEO_INGEST=1
+      - OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp
+      # Multi-camera: comma-separated list. Each item can be either:
+      # - rtsp://... (auto id camera-1, camera-2, ...)
+      # - camera-1=rtsp://... (explicit id)
+      # For quick validation we can point multiple ids to the same RTSP URL.
+      - VIDEO_SOURCES=camera-1=rtsp://192.168.1.73:8554/preview,camera-2=rtsp://192.168.1.73:8554/preview
+      # Fallback (used only if VIDEO_SOURCES is unset)
+      - VIDEO_SOURCE=rtsp://192.168.1.73:8554/preview
+      - VIDEO_SAMPLE_FPS=2
+      - VIDEO_RECONNECT_SECONDS=5
+      - PRESENCE_HEARTBEAT_SECONDS=5
+      - IDLE_MOTION_THRESHOLD=2.0
+      - MOTION_ACTIVE_THRESHOLD=2.0
+      - ACTIVE_CONFIRM_SECONDS=30
+      - IDLE_SECONDS=60
+      - AWAY_SECONDS=120
+      - ENABLE_POSE=1
+      - POSE_VISIBILITY_THRESHOLD=0.35
+      - FACE_MATCH_THRESHOLD=0.35
+      - DISTRACTED_EMOTIONS=anger,sadness,fear,disgust
+    volumes:
+      - ai_data:/data
+      - ./services/ai/models:/models
+    # GPU (optional): uncomment if you have NVIDIA Container Toolkit configured
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  ai-full:
+    profiles: ["full"]
+    build:
+      context: ..
+      dockerfile: services/ai/Dockerfile.full
+    ports:
+      - "9001:9000"
+    environment:
+      - ENVIRONMENT=dev
+      - CORE_API_URL=http://host.docker.internal:8000
+      - AI_INGEST_API_KEY=supersecret
+      - AI_DB_URL=sqlite+pysqlite:////data/ai.db
+      - MODEL_DIR=/models
+      - ZONE_MAP_JSON={"ap-1":"zone-a","ap-2":"zone-b","ble-1":"zone-a"}
+      - ENABLE_VIDEO_INGEST=1
+      - OPENCV_FFMPEG_CAPTURE_OPTIONS=rtsp_transport;tcp
+      - VIDEO_SOURCES=camera-1=rtsp://192.168.1.73:8554/preview,camera-2=rtsp://192.168.1.73:8554/preview
+      - VIDEO_SOURCE=rtsp://192.168.1.73:8554/preview
+      - VIDEO_SAMPLE_FPS=2
+      - VIDEO_RECONNECT_SECONDS=5
+      - PRESENCE_HEARTBEAT_SECONDS=5
+      - IDLE_MOTION_THRESHOLD=2.0
+      - MOTION_ACTIVE_THRESHOLD=2.0
+      - ACTIVE_CONFIRM_SECONDS=30
+      - IDLE_SECONDS=60
+      - AWAY_SECONDS=120
+      - ENABLE_POSE=1
+      - POSE_VISIBILITY_THRESHOLD=0.35
+      - FACE_MATCH_THRESHOLD=0.35
+      - DISTRACTED_EMOTIONS=anger,sadness,fear,disgust
+    volumes:
+      - ai_data_full:/data
+      - ./services/ai/models:/models
+
+volumes:
+  ai_data:
+  ai_data_full:

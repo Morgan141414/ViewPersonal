@@ -1,0 +1,13 @@
+# Optional "full" ML stack (VERY large image; may require build deps and more RAM/disk)
+# Install this instead of requirements.txt only if you really need torch/tf/dlib stacks in the same container.
+-r requirements.txt
+
+# PyTorch (CPU by default; for CUDA use extra index/pinned versions matching your CUDA)
+torch
+
+# TensorFlow (CPU by default in many environments; GPU support depends on TF version + CUDA)
+tensorflow
+
+# face_recognition / dlib (often requires compilation)
+dlib
+face_recognition

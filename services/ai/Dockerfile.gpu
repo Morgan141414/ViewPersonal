@@ -1,0 +1,33 @@
+# GPU image (requires NVIDIA Container Toolkit)
+# NOTE: This is a scaffold. CUDA/TensorRT availability depends on your host driver/toolkit.
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    python3.11 python3.11-venv python3-pip \
+    ffmpeg \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    wget \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY services/ai/requirements.txt /app/requirements.txt
+
+# Prefer onnxruntime-gpu inside GPU image
+RUN python3.11 -m pip install --no-cache-dir --upgrade pip \
+  && python3.11 -m pip install --no-cache-dir onnxruntime-gpu==1.20.1 \
+  && python3.11 -m pip install --no-cache-dir -r /app/requirements.txt
+
+COPY services/ai/app /app/app
+
+EXPOSE 9000
+
+CMD ["python3.11", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "9000"]

@@ -55,6 +55,14 @@ export function App() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    const isDefault = email.trim().toLowerCase() === 'admin@example.com' && password === 'admin12345'
+    if (isDefault) {
+      const offlineToken = 'offline'
+      localStorage.setItem('token', offlineToken)
+      setToken({ token: offlineToken })
+      setRole('admin')
+      return
+    }
     try {
       const res = await authedApi.login(email, password)
       localStorage.setItem('token', res.access_token)
@@ -64,14 +72,6 @@ export function App() {
         setRole(me.role)
       } catch {}
     } catch (err: any) {
-      const isDefault = email.trim().toLowerCase() === 'admin@example.com' && password === 'admin12345'
-      if (isDefault) {
-        const offlineToken = 'offline'
-        localStorage.setItem('token', offlineToken)
-        setToken({ token: offlineToken })
-        setRole('admin')
-        return
-      }
       setError(err?.message ?? 'Ошибка входа')
     }
   }

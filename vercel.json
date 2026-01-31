@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "installCommand": "npm install --prefix apps/dashboard",
+  "buildCommand": "npm run build --prefix apps/dashboard",
+  "outputDirectory": "apps/dashboard/dist"
+}

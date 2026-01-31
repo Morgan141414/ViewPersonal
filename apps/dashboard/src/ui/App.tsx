@@ -11,6 +11,7 @@ import { Sidebar } from './components/Sidebar'
 import { OverviewPage } from './pages/OverviewPage'
 import { TrainingPage } from './pages/TrainingPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { EmployeesPage } from './pages/EmployeesPage'
 
 type TokenState = { token: string } | { token: null }
 
@@ -57,10 +58,7 @@ export function App() {
     setError(null)
     const isDefault = email.trim().toLowerCase() === 'admin@example.com' && password === 'admin12345'
     if (isDefault) {
-      const offlineToken = 'offline'
-      localStorage.setItem('token', offlineToken)
-      setToken({ token: offlineToken })
-      setRole('admin')
+      loginOffline()
       return
     }
     try {
@@ -74,6 +72,13 @@ export function App() {
     } catch (err: any) {
       setError(err?.message ?? 'Ошибка входа')
     }
+  }
+
+  function loginOffline() {
+    const offlineToken = 'offline'
+    localStorage.setItem('token', offlineToken)
+    setToken({ token: offlineToken })
+    setRole('admin')
   }
 
   useEffect(() => {
@@ -107,6 +112,9 @@ export function App() {
             <button className="btn" type="submit">Войти</button>
           </form>
           <div className="row" style={{ marginTop: 12 }}>
+            <button className="btn secondary" type="button" onClick={loginOffline}>
+              Войти офлайн (админ)
+            </button>
             <button className="btn secondary" type="button" onClick={() => (window.location.href = `${authedApi.coreUrl}/v1/auth/oauth/google/start`)}>
               Войти через Google
             </button>
@@ -180,6 +188,7 @@ export function App() {
               <Route path="/oauth/callback" element={<OAuthCallback onToken={(t) => setToken({ token: t })} />} />
               <Route path="/overview" element={<OverviewPage api={authedApi as any} role={role} />} />
               <Route path="/presence" element={<PresencePage api={authedApi as any} />} />
+              <Route path="/employees" element={<EmployeesPage api={authedApi as any} />} />
               <Route path="/cameras" element={<CamerasPage api={authedApi as any} />} />
               <Route path="/alerts" element={<AlertsPage api={authedApi as any} role={role} />} />
               <Route path="/ai" element={<AiPanel api={authedApi as any} />} />

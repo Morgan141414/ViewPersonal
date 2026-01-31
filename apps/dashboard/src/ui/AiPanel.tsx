@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tabs from '@radix-ui/react-tabs'
-import { Brain, FileImage, Flame, MessageCircle, RefreshCcw, Shield, UserPlus } from 'lucide-react'
+import { Brain, FileImage, Flame, MessageCircle, RefreshCcw, Shield } from 'lucide-react'
 import { StatusBadge } from './components/StatusBadge'
 
 type Employee = {
@@ -28,8 +28,6 @@ type Api = {
   listEmployees(): Promise<Employee[]>
   getAiCurrent(): Promise<AiCurrent[]>
   getHeatmap(minutes?: number): Promise<{ ok: boolean; window_minutes: number; zones: Record<string, number> }>
-  faceEnroll(employee_id: string, file: File): Promise<any>
-  faceIdentify(file: File, top_k?: number): Promise<any>
   analyzeImage(file: File, opts?: { employee_id?: string; source_id?: string }): Promise<any>
   chatRespond(message: string, context?: any): Promise<{ ok: boolean; reply: string; ts: string; suggestions?: string[] }>
 }
@@ -49,8 +47,6 @@ export function AiPanel({ api }: { api: Api }) {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('')
   const [sourceId, setSourceId] = useState('cam-1')
 
-  const [enrollFile, setEnrollFile] = useState<File | null>(null)
-  const [identifyFile, setIdentifyFile] = useState<File | null>(null)
   const [analyzeFile, setAnalyzeFile] = useState<File | null>(null)
 
   const [aiCurrent, setAiCurrent] = useState<AiCurrent[]>([])
@@ -102,40 +98,6 @@ export function AiPanel({ api }: { api: Api }) {
       } catch {}
     }
   }, [api.coreUrl])
-
-  async function doEnroll() {
-    setError(null)
-    setResult(null)
-    if (!selectedEmployeeId) return setError('Сначала выберите сотрудника')
-    if (!enrollFile) return setError('Выберите файл изображения для добавления')
-
-    setBusy('enroll')
-    try {
-      const r = await api.faceEnroll(selectedEmployeeId, enrollFile)
-      setResult(r)
-      await refresh()
-    } catch (e: any) {
-      setError(String(e?.message ?? e))
-    } finally {
-      setBusy(null)
-    }
-  }
-
-  async function doIdentify() {
-    setError(null)
-    setResult(null)
-    if (!identifyFile) return setError('Выберите файл изображения для идентификации')
-
-    setBusy('identify')
-    try {
-      const r = await api.faceIdentify(identifyFile, 5)
-      setResult(r)
-    } catch (e: any) {
-      setError(String(e?.message ?? e))
-    } finally {
-      setBusy(null)
-    }
-  }
 
   async function doAnalyze() {
     setError(null)
@@ -278,34 +240,8 @@ export function AiPanel({ api }: { api: Api }) {
             </div>
 
             <div className="rounded-xl border border-border bg-surface p-4">
-              <div className="text-sm font-semibold">FaceID (опционально)</div>
-              <div className="mt-2 text-xs text-muted">Включайте только при соблюдении требований и согласии.</div>
-              <details className="mt-3">
-                <summary className="cursor-pointer select-none text-xs text-white/80">Показать инструменты FaceID</summary>
-                <div className="mt-3 grid grid-cols-1 gap-3">
-                  <div className="rounded-xl border border-border bg-card p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold">Добавить</div>
-                      <UserPlus size={14} className="text-white/60" />
-                    </div>
-                    <input className="mt-3 w-full text-sm" type="file" accept="image/*" onChange={(e) => setEnrollFile(e.target.files?.[0] ?? null)} />
-                    <button className="mt-3 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-white/90 hover:bg-bg" disabled={busy !== null} onClick={doEnroll}>
-                      {busy === 'enroll' ? 'Добавление…' : 'Добавить лицо'}
-                    </button>
-                  </div>
-
-                  <div className="rounded-xl border border-border bg-card p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold">Идентификация</div>
-                      <FileImage size={14} className="text-white/60" />
-                    </div>
-                    <input className="mt-3 w-full text-sm" type="file" accept="image/*" onChange={(e) => setIdentifyFile(e.target.files?.[0] ?? null)} />
-                    <button className="mt-3 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-white/90 hover:bg-bg" disabled={busy !== null} onClick={doIdentify}>
-                      {busy === 'identify' ? 'Идентификация…' : 'Идентифицировать лицо'}
-                    </button>
-                  </div>
-                </div>
-              </details>
+              <div className="text-sm font-semibold">FaceID</div>
+              <div className="mt-2 text-xs text-muted">Регистрация лиц перенесена в раздел «Сотрудники».</div>
             </div>
           </div>
 

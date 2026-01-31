@@ -26,3 +26,4 @@ npm-debug.log*
 
 # IDE
 .vscode/
+apps/dashboard/src/utils/api.ts.txt

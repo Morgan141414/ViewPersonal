@@ -8,6 +8,7 @@ import {
   Sparkles,
   GraduationCap,
   Users,
+  User,
   Video,
 } from 'lucide-react'
 import { clsx } from 'clsx'
@@ -22,6 +23,7 @@ type NavItem = {
 const items: NavItem[] = [
   { to: '/overview', label: 'Обзор', Icon: LayoutDashboard },
   { to: '/presence', label: 'Присутствие', Icon: Users },
+  { to: '/employees', label: 'Сотрудники', Icon: User },
   { to: '/cameras', label: 'Камеры', Icon: Video },
   { to: '/alerts', label: 'Оповещения', Icon: Bell, roles: ['admin', 'hr', 'manager'] },
   { to: '/ai', label: 'ИИ', Icon: Sparkles },
@@ -30,10 +32,29 @@ const items: NavItem[] = [
   { to: '/settings', label: 'Настройки', Icon: Settings },
 ]
 
-export function Sidebar({ onLogout, role }: { onLogout: () => void; role: string }) {
+export function Sidebar({
+  onLogout,
+  role,
+  className,
+  showOnMobile = false,
+  onNavigate,
+}: {
+  onLogout: () => void
+  role: string
+  className?: string
+  showOnMobile?: boolean
+  onNavigate?: () => void
+}) {
   const visible = items.filter((item) => !item.roles || item.roles.includes(role))
   return (
-    <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-[260px] shrink-0 rounded-xl border border-border bg-surface p-4 lg:flex lg:flex-col">
+    <aside
+      className={clsx(
+        showOnMobile
+          ? 'flex h-[calc(100vh-2rem)] w-[280px] flex-col rounded-2xl border border-border bg-surface p-4'
+          : 'sticky top-6 hidden h-[calc(100vh-3rem)] w-[260px] shrink-0 rounded-xl border border-border bg-surface p-4 lg:flex lg:flex-col',
+        className,
+      )}
+    >
       <div>
         <div className="text-base font-semibold tracking-tight">Центр производительности искусственного интеллекта</div>
         <div className="mt-1 text-xs text-muted">Центр управления</div>
@@ -52,6 +73,7 @@ export function Sidebar({ onLogout, role }: { onLogout: () => void; role: string
                   : 'text-white/80 hover:bg-card hover:text-white',
               )
             }
+            onClick={() => onNavigate?.()}
           >
             {({ isActive }) => (
               <>

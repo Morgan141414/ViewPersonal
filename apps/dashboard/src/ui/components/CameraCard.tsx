@@ -31,10 +31,16 @@ export function CameraCard({
   cam,
   onOpen,
   onRestart,
+  aiUrl,
+  previewNonce,
+  previewFps = 2,
 }: {
   cam: CameraStatus
   onOpen: () => void
   onRestart: () => void
+  aiUrl: string
+  previewNonce: number
+  previewFps?: number
 }) {
   const { getAlias } = useCameraAliases()
   const alias = getAlias(cam.source_id)
@@ -80,11 +86,20 @@ export function CameraCard({
       </div>
 
       <div className="relative mx-4 mb-4 overflow-hidden rounded-xl border border-border bg-surface" style={{ aspectRatio: '16 / 9' }}>
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-          {cam.running ? <Video size={22} className="text-white/50" /> : <VideoOff size={22} className="text-white/50" />}
-          <div className="text-sm font-medium text-white/80">Видео по клику</div>
-          <div className="text-xs text-muted">Откройте живой просмотр, чтобы увидеть поток</div>
-        </div>
+        {cam.running ? (
+          <img
+            src={`${aiUrl}/v1/ingest/stream/${encodeURIComponent(cam.source_id)}?fps=${previewFps}&nonce=${previewNonce}`}
+            alt={cam.source_id}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+            <VideoOff size={22} className="text-white/50" />
+            <div className="text-sm font-medium text-white/80">Видео недоступно</div>
+            <div className="text-xs text-muted">Проверьте поток камеры</div>
+          </div>
+        )}
 
         <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-2">
           <StatusBadge label={`FPS ${cam.fps}`} tone="muted" />
